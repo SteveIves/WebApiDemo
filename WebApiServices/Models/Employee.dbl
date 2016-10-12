@@ -1,0 +1,136 @@
+
+import System
+import System.ComponentModel.DataAnnotations
+
+namespace WebApiServices.Models
+
+	public enum EmployeePayrollType
+		Hourly, 1
+		Salaried, 2
+	endenum
+
+	public class Employee
+
+		{Required}
+		public property Id, int
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Required}
+		{StringLength(20)}
+		public property FirstName, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Required}
+		{StringLength(20)}
+		public property LastName, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Required}
+		{StringLength(15)}
+		public property Department, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		public property HireDateTime, DateTime
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+
+		{Phone}		
+		public property PhoneWork, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Phone}		
+		public property PhoneHome, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Phone}		
+		public property PhoneCell, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		public property EmployeeType, EmployeePayrollType
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+
+		public property DateOfBirth, DateTime
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{EmailAddress}
+		public property Email, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{StringLength(30)}
+		public property StreetAddress, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{StringLength(20)}
+		public property City, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{StringLength(2)}
+		public property State, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		{Range(1001,99999)}
+		public property ZipCode, int
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+
+	endclass
+
+endnamespace

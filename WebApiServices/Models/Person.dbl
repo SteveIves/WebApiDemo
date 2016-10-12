@@ -1,0 +1,51 @@
+
+import System
+import System.ComponentModel.DataAnnotations
+
+namespace WebApiServices.Models
+	
+	;;; <summary>
+	;;; Represents information about a person.
+	;;; </summary>
+	public class Person
+		
+		;;; <summary>
+		;;; Person ID.
+		;;; </summary>
+		{Required(ErrorMessage = "Id is a required field!")}
+		public property Id, int
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		;;; <summary>
+		;;; First name.
+		;;; </summary>
+		{Required(ErrorMessage = "First name is required!")}
+		{MinLength(2, ErrorMessage = "First name must contain at least two characters!")}
+		{StringLength(15, ErrorMessage = "First name may not contain more than 15 characters!")}
+		public property FirstName, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+		
+		;;; <summary>
+		;;; Last name.
+		;;; </summary>
+		{Required(ErrorMessage = "Last name is required!")}
+		{MinLength(2, ErrorMessage = "Last name must contain at least two characters!")}
+		{StringLength(15, ErrorMessage = "Last name may not contain more than 15 characters!")}
+		public property LastName, string
+			method get
+			endmethod
+			method set
+			endmethod
+		endproperty
+
+	endclass
+
+endnamespace

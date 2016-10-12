@@ -1,0 +1,327 @@
+
+import System
+import System.Collections.Generic
+import System.ComponentModel
+import System.Globalization
+import System.Linq
+import System.Net
+import System.Net.Http
+import System.Web.Http
+import System.ComponentModel.DataAnnotations
+import WebApiServices.Models
+import Synergex.SynergyDE.Select
+
+;;
+;; This example uses ModelValidation, but the validation is implemented in a custom Filter
+;; called ValidateModelAttribute. This filter is enabed in the hosting web application with
+;; custom code in the WebApiConfig class.
+;;
+
+namespace WebApiServices.Controllers
+
+	.include "EMPLOYEE" repository, structure="strEmployee", end
+	
+	{RoutePrefix("employee")}
+	;;; <summary>
+	;;; An example API Controller exposing CRUD functionality for sample employee data.
+	;;; </summary>
+	public class EmployeeController extends ApiController
+		
+		;;; <summary>
+		;;; Constructs a new PersonController.
+		;;; </summary>
+		public method EmployeeController
+		proc
+			data sts, i4
+			xcall setlog("DAT","C:\DEV\PRIVATE\WebApiDemo\DAT",sts)
+		endmethod
+		
+		{Route("")}
+		;;; <summary>
+		;;; Determine how much data GetAll will return.
+		;;; </summary>
+		;;; <returns>A collection of Employee objects.</returns>
+		public method HeadGetAll, @IEnumerable<Employee>
+		proc
+			data results = new List<Employee>()
+			data emp, strEmployee
+			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp))
+			begin
+				results.Add(makeEmployeeObject(emp))
+			end
+			mreturn results
+		endmethod
+
+		{Route("")}
+		;;; <summary>
+		;;; Retrieve all employees.
+		;;; </summary>
+		;;; <returns>A collection of Employee objects.</returns>
+		public method GetAll, @IEnumerable<Employee>
+		proc
+			data results = new List<Employee>()
+			data emp, strEmployee
+			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp))
+			begin
+				results.Add(makeEmployeeObject(emp))
+			end
+			mreturn results
+		endmethod
+		
+		{Route("department/{departmentId}")}
+		;;; <summary>
+		;;; Retrieve employees by department.
+		;;; </summary>
+		;;; <param name="departmentId">Department ID</param>
+		;;; <returns>A collection of Employee objects.</returns>
+		public method GetByDepartment, @IEnumerable<Employee>
+			required in departmentId, string
+		proc
+			data results = new List<Employee>()
+			data dept, a15, departmentId.ToUpper()
+			data emp, strEmployee
+			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp),(Where)emp.emp_dept.eqs.dept)
+			begin
+				results.Add(makeEmployeeObject(emp))
+			end
+			mreturn results
+		endmethod
+		
+		{Route("name/{lastNamePattern}")}
+		;;; <summary>
+		;;; Retrieve employees by last name.
+		;;; </summary>
+		;;; <param name="lastNamePattern">Text to search for within last name.</param>
+		;;; <returns>A collection of Employee objects.</returns>
+		public method GetByName, @IEnumerable<Employee>
+			required in lastNamePattern, string
+		proc
+			data results = new List<Employee>()
+			data emp, strEmployee
+			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp),NoCaseWhere.Contains(emp.emp_last_name,lastNamePattern))
+			begin
+				results.Add(makeEmployeeObject(emp))
+			end
+			mreturn results
+		endmethod
+		
+		{Route("{employeeId}")}
+		;;; <summary>
+		;;; Retrieve an employee by employee ID.
+		;;; </summary>
+		;;; <param name="employeeId">ID of employee to retrieve.</param>
+		;;; <returns>Returns an Employee object.</returns>
+		public method GetOne, @Employee
+			required in employeeId, int
+		proc
+			data emp, strEmployee
+			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp),(Where)emp.emp_id==employeeId)
+			begin
+				mreturn makeEmployeeObject(emp)
+			end
+			throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.NotFound,"Employee not found!"))
+		endmethod
+		
+		{Route("")}
+		;;; <summary>
+		;;; Create an employee.
+		;;; </summary>
+		;;; <param name="newEmployee">Employee to create.</param>
+		;;; <returns>Returns an HttpResponseMessage indicating the status of the operation and, on success, containing a URL that can be used to retrieve the Employee object.</returns>
+		public method Post, @HttpResponseMessage
+			{FromBody()}
+			required in newEmployee, @Employee
+		proc
+			data chn, i4
+			data emp, strEmployee
+
+			;;Open the file
+			open(chn=0,U:I,"DAT:EMPLOYEE.ISM")
+
+			;;Make sure the employee does not already exist
+			try
+			begin
+				emp.emp_id = %integer(newEmployee.Id)
+				read(chn,emp,^a(emp.emp_id),LOCK:Q_NO_LOCK)
+				close chn
+				mreturn Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Employee already exists!")
+			end
+			catch (e, @KeyNotSameException)
+			begin
+				nop
+			end
+			catch (e, @EndOfFileException)
+			begin
+				nop
+			end
+			catch (e, @Exception)
+			begin
+				close chn
+				mreturn Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.Message)
+			end
+			endtry
+
+			;;Move the data into a record
+			emp = makeEmployeeRecord(newEmployee)
+				
+			;;If we get here the data looks good and employee does not already exist
+			store(chn,emp)
+
+			close chn
+
+			data response = Request.CreateResponse(HttpStatusCode.Created)
+			response.Headers.Location = new Uri(String.Format("{0}/{1}",Request.RequestUri,newEmployee.Id.ToString()))
+
+			mreturn response
+
+		endmethod
+		
+		{Route("")}
+		;;; <summary>
+		;;; Update an employee.
+		;;; </summary>
+		;;; <param name="updatedEmployee">Employee to update.</param>
+		;;; <returns>Returns an HttpResponseMessage indicating the status of the operation.</returns>
+		public method Put, @HttpResponseMessage
+			{FromBody()}
+			required in updatedEmployee, @Employee
+		proc
+			data response, @HttpResponseMessage
+			data chn, i4
+			data emp, strEmployee
+				
+			;;Read and lock the employee record
+			try
+			begin
+				open(chn=0,U:I,"DAT:EMPLOYEE.ISM")
+				read(chn,emp,^a(emp.emp_id=%integer(updatedEmployee.Id)))
+				try
+				begin
+					write(chn,emp = makeEmployeeRecord(updatedEmployee))
+					response = Request.CreateResponse(HttpStatusCode.OK)
+				end
+				catch (e, @KeyNotSameException)
+				begin
+					response = Request.CreateErrorResponse(HttpStatusCode.BadRequest,"Attempt to modify a key that does not allow changes!")
+				end
+				catch (e, @DuplicateException)
+				begin
+					response = Request.CreateErrorResponse(HttpStatusCode.BadRequest,"Attempt to create an employee that violates a unique key constraint!")
+				end
+				endtry
+			end
+			catch (e, @KeyNotSameException)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.NotFound,"Employee not found!")
+			end
+			catch (e, @EndOfFileException)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.NotFound,"Employee not found!")
+			end
+			catch (e, @Exception)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.Message)
+			end
+			finally
+			begin
+				if (chn&&%chopen(chn))
+					close chn
+			end
+			endtry
+
+			mreturn response
+
+		endmethod
+		
+		{Route("{employeeId}")}
+		;;; <summary>
+		;;; Deletes an employee.
+		;;; </summary>
+		;;; <param name="employeeId">Employee ID of employee to delete.</param>
+		;;; <returns>Returns an HttpResponseMessage indicating the status of the operation.</returns>
+		public method Delete, @HttpResponseMessage
+			required in employeeId, int
+		proc
+			data response, @HttpResponseMessage
+			data chn, i4
+			data emp, strEmployee
+
+			try
+			begin
+				open(chn=0,U:I,"DAT:EMPLOYEE.ISM")
+				read(chn,emp,^a(emp.emp_id=%integer(employeeId)))
+				delete(chn)
+				response = Request.CreateResponse(HttpStatusCode.OK)
+			end
+			catch (e, @KeyNotSameException)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.NotFound, "Employee not found!")
+			end
+			catch (e, @EndOfFileException)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.NotFound, "Employee not found!")
+			end
+			catch (e, @Exception)
+			begin
+				response = Request.CreateErrorResponse(HttpStatusCode.InternalServerError, e.Message)
+			end
+			finally
+			begin
+				if (chn&&%chopen(chn))
+					close chn
+			end
+			endtry
+
+			mreturn response
+
+		endmethod
+
+		private method makeEmployeeObject, @Employee
+			required in emp, strEmployee
+		proc
+			mreturn new Employee() { 
+			&	Id = (int)emp.emp_id,
+			&	FirstName=%atrim(emp.emp_first_name), 
+			&	LastName=%atrim(emp.emp_last_name),
+			&	Department = %atrim(emp.emp_dept),
+			&	HireDateTime = DateTime.ParseExact(%string(emp.emp_hire_date)+%string(emp.emp_hire_time,"XXXX"),"yyyyMMddhhmm",CultureInfo.InvariantCulture,DateTimeStyles.None),
+			&	PhoneHome = %atrim(emp.emp_phone_home),
+			&	PhoneWork = %atrim(emp.emp_phone_work),
+			&	PhoneCell = %atrim(emp.emp_phone_cell),
+			&	EmployeeType = (EmployeePayrollType)(int)emp.emp_paid,
+			&	DateOfBirth = DateTime.ParseExact(%string(emp.emp_date_of_birth),"yyyyMMdd",CultureInfo.InvariantCulture,DateTimeStyles.None),
+			&	Email = %atrim(emp.emp_email),
+			&	StreetAddress = %atrim(emp.emp_address_street),
+			&	City = %atrim(emp.emp_address_city),
+			&	State = %atrim(emp.emp_address_state),
+			&	ZipCode = (int)emp.emp_address_zip}
+		endmethod
+		
+		private method makeEmployeeRecord, strEmployee
+			required in empObj, @Employee
+		proc
+			data emp, strEmployee
+			init emp
+			emp.emp_id = empObj.Id
+			emp.emp_first_name = empObj.FirstName
+			emp.emp_last_name = empObj.LastName
+			emp.emp_dept = empObj.Department
+			emp.emp_hire_date = ((empObj.HireDateTime.Year * 10000) + (empObj.HireDateTime.Month * 100) + empObj.HireDateTime.Day)
+			emp.emp_phone_home = empObj.PhoneHome
+			emp.emp_phone_work = empObj.PhoneWork
+			emp.emp_phone_cell = empObj.PhoneCell
+			emp.emp_paid = (int)empObj.EmployeeType
+			emp.emp_home_ok = 1
+			emp.emp_date_of_birth = ((empObj.DateOfBirth.Year * 10000) + (empObj.DateOfBirth.Month * 100) + empObj.DateOfBirth.Day)
+			emp.emp_hire_time = ((empObj.HireDateTime.Hour * 100) + empObj.HireDateTime.Minute)
+			emp.emp_email = empObj.Email
+			emp.emp_address_street = empObj.StreetAddress
+			emp.emp_address_city = empObj.City
+			emp.emp_address_state = empObj.State
+			emp.emp_address_zip = empObj.ZipCode
+			mreturn emp
+		endmethod
+		
+	endclass
+	
+endnamespace
