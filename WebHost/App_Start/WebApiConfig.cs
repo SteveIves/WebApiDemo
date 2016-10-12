@@ -25,6 +25,7 @@ namespace WebHost
             // Web API routes
             config.MapHttpAttributeRoutes();
 
+            // Default routing
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
