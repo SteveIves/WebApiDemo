@@ -33,7 +33,7 @@ namespace WebApiServices.Controllers
 		public method EmployeeController
 		proc
 			data sts, i4
-			xcall setlog("DAT","C:\DEV\PRIVATE\WebApiDemo\DAT",sts)
+			xcall setlog("DAT","C:\DEV\PUBLIC\WebApiDemo\DAT",sts)
 		endmethod
 		
 		{Route("")}
