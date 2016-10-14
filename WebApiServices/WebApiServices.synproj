@@ -76,7 +76,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\EmployeeDemo.dbl" />
+    <Compile Include="Controllers\EmployeeController.dbl" />
     <Compile Include="Controllers\PersonController.dbl" />
     <Compile Include="Filters\ValidateModelAttribute.dbl" />
     <Compile Include="Models\Employee.dbl" />
