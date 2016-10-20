@@ -38,22 +38,6 @@ namespace WebApiServices.Controllers
 		
 		{Route("")}
 		;;; <summary>
-		;;; Determine how much data GetAll will return.
-		;;; </summary>
-		;;; <returns>A collection of Employee objects.</returns>
-		public method HeadGetAll, @IEnumerable<Employee>
-		proc
-			data results = new List<Employee>()
-			data emp, strEmployee
-			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp))
-			begin
-				results.Add(makeEmployeeObject(emp))
-			end
-			mreturn results
-		endmethod
-
-		{Route("")}
-		;;; <summary>
 		;;; Retrieve all employees.
 		;;; </summary>
 		;;; <returns>A collection of Employee objects.</returns>
@@ -322,6 +306,22 @@ namespace WebApiServices.Controllers
 			mreturn emp
 		endmethod
 		
+;		{Route("")}
+;		;;; <summary>
+;		;;; Determine how much data GetAll will return.
+;		;;; </summary>
+;		;;; <returns>A collection of Employee objects.</returns>
+;		public method HeadGetAll, @IEnumerable<Employee>
+;		proc
+;			data results = new List<Employee>()
+;			data emp, strEmployee
+;			foreach emp in new Select(new From("DAT:EMPLOYEE.ISM",emp))
+;			begin
+;				results.Add(makeEmployeeObject(emp))
+;			end
+;			mreturn results
+;		endmethod
+
 	endclass
 	
 endnamespace
