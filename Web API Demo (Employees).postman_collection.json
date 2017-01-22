@@ -1,0 +1,163 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Web API Demo (Employees)",
+		"_postman_id": "3da3f8b4-23dd-cc31-9eba-2b0874fba47b",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Employees",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Employee 1",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Employee 100 (Not Found)",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee/100",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Employees in Accounting",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee/department/accounting",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Employees Last Name Contains \"mc\"",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee/name/mc",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Create Employee 1000",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"Id\": 1000,\r\n\"FirstName\": \"Alan\",\r\n\"LastName\": \"Newbeguy\",\r\n\"Department\": \"PRODUCTION\",\r\n\"HireDateTime\": \"2016-10-11T11:46:00\",\r\n\"PhoneWork\": \"(555) 322-4455\",\r\n\"PhoneHome\": \"(555) 844-5664\",\r\n\"PhoneCell\": \"(555) 322-3395\",\r\n\"EmployeeType\": 2,\r\n\"DateOfBirth\": \"1964-07-19T00:00:00\",\r\n\"Email\": \"alan.newbeguy@yahoo.com\",\r\n\"StreetAddress\": \"602 Mill Street\",\r\n\"City\": \"Roseville\",\r\n\"State\": \"CA\",\r\n\"ZipCode\": 95747\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Update Employee 1000",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"Id\": 1000,\r\n\"FirstName\": \"Alan\",\r\n\"LastName\": \"Newbeguy\",\r\n\"Department\": \"QA\",\r\n\"HireDateTime\": \"2016-10-11T11:46:00\",\r\n\"PhoneWork\": \"(555) 322-4455\",\r\n\"PhoneHome\": \"(555) 334-2334\",\r\n\"PhoneCell\": \"(555) 322-3395\",\r\n\"EmployeeType\": 2,\r\n\"DateOfBirth\": \"1964-07-19T00:00:00\",\r\n\"Email\": \"alan.newbeguy@yahoo.com\",\r\n\"StreetAddress\": \"602 New Abode Street\",\r\n\"City\": \"San Francisco\",\r\n\"State\": \"CA\",\r\n\"ZipCode\": 97334\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Employee 1000",
+			"request": {
+				"url": "http://localhost/WebApiDemo/employee/1000",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
